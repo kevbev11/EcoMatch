@@ -8,6 +8,12 @@ with ui.column().classes('absolute-center items-center'):
     with ui.row().classes('justify-center items-center gap-4'):
         ui.button('company', on_click=lambda: ui.navigate.to('/company_profile'), color="#88c5d8").style('font-size: 400%;').props('rounded')
         ui.button('organization', on_click=lambda: ui.navigate.to('/org_profile'), color="#88c5d8").style('font-size: 400%;').props('rounded')
+        # test for no match page: ui.button('no match', on_click=lambda: ui.navigate.to('/no_match'), color="#88c5d8").style('font-size: 400%;').props('rounded')
+        
+@ui.page('/no_match')
+def no_match():
+    with ui.column().classes('absolute-center items-center'):
+        ui.label('No matches found yet. Please check back later when more businesses have registered.').style('color: #88c5d8; font-size: 400%; font-weight: 300')
 
 @ui.page('/company_profile')
 def company_profile():
