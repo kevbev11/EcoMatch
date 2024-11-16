@@ -1,3 +1,21 @@
+class Company:
+    def __init__(self, name, location, resources, quantity, time):
+        self.name = name
+        self.location = location
+        self.resources = []
+        for i in range(len(resources)):
+            self.resources.append((resources[i], quantity[i]))
+        self.time = time
+
+class Organization:
+    def __init__(self, name, location, resources, quantity, time):
+        self.name = name
+        self.location = location
+        self.resources = []
+        for i in range(len(resources)):
+            self.resources.append((resources[i], quantity[i]))
+        self.time = time
+
 #picks between company or charity
 def getType():
     options = ["Company", "Charitable Oranization"]
@@ -32,24 +50,6 @@ def getInfo(type):
         quantity = [int(input("How many do you need?"))]
         time = [int(input("In how many days do you need it by (type a number)?"))]
         return Organization(name, location, resource, quantity, time)
-
-class Company:
-    def __init__(self, name, location, resources, quantity, time):
-        self.name = name
-        self.location = location
-        self.resources = []
-        for i in range(len(resources)):
-            self.resources.append((resources[i], quantity[i]))
-        self.time = time
-
-class Organization:
-    def __init__(self, name, location, resources, quantity, time):
-        self.name = name
-        self.location = location
-        self.resources = []
-        for i in range(len(resources)):
-            self.resources.append((resources[i], quantity[i]))
-        self.time = time
 
 def main():
     companies = set()
