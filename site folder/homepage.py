@@ -6,12 +6,22 @@ from nicegui import ui
 
 #mainpage
 
-@ui.page('/other_page')
-def other_page():
-    ui.label('this is the other page')
+@ui.page('/profile')
+def profile():
+    with ui.card():
+        name = ui.input(label='Name', placeholder='start typing', value = '')
+        email = ui.input(label='Email', placeholder='example@gmail.com')
+        phone = ui.input(label='Phone Number', placeholder='(XXX) XXX-XXXX')
+        address = ui.input(label='Address', placeholder='start typing')
+        city = ui.input(label='City', placeholder='ex. Danville')
+        state = ui.input(label='State', placeholder='ex. CA')
+        zip_code = ui.input(label='Zip Code', placeholder='start typing')
+        time = ui.input(label='When?', placeholder='start typing')
+        quantity = ui.input(label='How many?', placeholder='start typing')
+
 
 with ui.button_group():
-    ui.button('Company', on_click=lambda: ui.navigate.to('/other_page'), color = 'yellow').style('font-size: 100px').props('outline')
-    ui.button('Organization', on_click=lambda: ui.navigate.to('/other_page')).style('font-size: 100px')
+    ui.button('Company', on_click=lambda: ui.navigate.to('/profile'), color = 'yellow').style('font-size: 100px').props('outline')
+    ui.button('Organization', on_click=lambda: ui.navigate.to('/profile')).style('font-size: 100px')
 
 ui.run()
