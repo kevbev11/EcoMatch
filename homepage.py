@@ -39,14 +39,11 @@ def company_profile():
         
         # data.companies.add(users.Company(name, email, phone, address, zip_code, time))
 
-
-
-
-with ui.row().classes('items-center'):
-    ui.label('I am a . . .').style('color: #88c5d8; font-size: 500%; font-weight: 300')
-    with ui.button_group():
-        ui.button('Company', on_click=lambda: ui.navigate.to('/company_profile'), color = "#88c5d8").style('font-size: 100px; margin-right: 100px;')
-        ui.button('Organization', on_click=lambda: ui.navigate.to('/org_profile'), color = "#88c5d8").style('font-size: 100px')
+with ui.column().classes('absolute-center items-center'):
+    ui.label('I am a . . .').style('color: #88c5d8; font-size: 800%; font-weight: 1000')
+    with ui.row().classes('justify-center items-center gap-4'):
+        ui.button('company', on_click=lambda: ui.navigate.to('/company_profile'), color="#88c5d8").style('font-size: 400%;').props('rounded')
+        ui.button('organization', on_click=lambda: ui.navigate.to('/org_profile'), color="#88c5d8").style('font-size: 400%;').props('rounded')
 
 
 ui.run()
