@@ -151,6 +151,8 @@ def company_profile():
                     
                     time = days_between_dates(date.value)
 
+                    data.currComp = users.Company(name.value, email.value, phone.value, address.value, [r for r in resources], [q for q in quantity], time)
+
                     data.companies.add(users.Company(name.value, email.value, phone.value, address.value, [r for r in resources], [q for q in quantity], time))
                     
                     # Display or process the Company object
@@ -230,6 +232,8 @@ def org_profile():
                         return
                     
                     time = days_between_dates(date.value)
+                    
+                    data.currOrg = users.Organization(name.value, email.value, phone.value, address.value, [r for r in resources], [q for q in quantity], time)
 
                     data.orgs.add(users.Organization(name.value, email.value, phone.value, address.value, [r for r in resources], [q for q in quantity], time))
                     
@@ -252,6 +256,6 @@ def days_between_dates(date: str) -> int: #Calculate the number of days between 
         d2 = datetime.strptime(date, "%Y-%m-%d")  # Convert input string to datetime
         return abs((d2 - d1).days)  # Return the absolute difference in days
     except ValueError as e:
-        raise ValueError(f"Invalid date format: {date_str}. Expected format is YYYY-MM-DD.") from e
+        raise ValueError(f"Invalid date format: {date}. Expected format is YYYY-MM-DD.") from e
 
 ui.run()

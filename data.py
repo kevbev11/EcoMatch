@@ -2,6 +2,8 @@ import users
 #global sets for companies and orgs here
 companies = set()
 orgs = set()
+currComp = None
+currOrg = None
 
 company1 = users.Company(
     name="Green Suppliers Inc.",
