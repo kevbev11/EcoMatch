@@ -2,10 +2,28 @@ from nicegui import ui
 import users
 import data
 from datetime import datetime
+import time
+import threading
+
+label = ui.label("I am a.").style('color: #88c5d8; font-size: 800%; font-weight: 1000').style('position: absolute; top: 25%; left: 50%; transform: translate(-50%, -50%);')
+
+def animate_ellipsis():
+    count = 0
+    def update_label():
+        nonlocal count
+        if count == 0:
+            label.set_text("I am a.")
+        elif count == 1:
+            label.set_text("I am a..")
+        elif count == 2:
+            label.set_text("I am a...")
+        count = (count + 1) % 3
+    ui.timer(0.5, update_label)
+animate_ellipsis()
 
 #mainpage
 with ui.column().classes('absolute-center items-center'):
-    ui.label('I am a . . .').style('color: #88c5d8; font-size: 800%; font-weight: 1000')
+    #ui.label('I am a . . .').style('color: #88c5d8; font-size: 800%; font-weight: 1000')
     with ui.row().classes('justify-center items-center gap-4'):
         ui.button('company', on_click=lambda: ui.navigate.to('/company_profile'), color="#88c5d8").style('font-size: 400%;').props('rounded')
         ui.button('organization', on_click=lambda: ui.navigate.to('/org_profile'), color="#88c5d8").style('font-size: 400%;').props('rounded')
