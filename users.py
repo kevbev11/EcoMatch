@@ -1,9 +1,9 @@
 class Company:
-    def __init__(self, name, email, phone, address, zip_code, resources, quantity, time):
+    def __init__(self, name, email, phone, address, resources, quantity, time):
         self.name = name
         self.email = email
         self.phone = phone
-        self.location = address + ', ' + str(zip_code)
+        self.location = address
         self.resources = []
         for i in range(len(resources)):
             self.resources.append((resources[i], quantity[i]))
@@ -17,11 +17,11 @@ class Company:
         return f'{self.name} at {self.location} can provide {resources} in {self.time} days'
 
 class Organization:
-    def __init__(self, name, email, phone, address, zip_code, resources, quantity, time):
+    def __init__(self, name, email, phone, address, resources, quantity, time):
         self.name = name
         self.email = email
         self.phone = phone
-        self.location = address + ', ' + str(zip_code)
+        self.location = address
         self.resources = []
         for i in range(len(resources)):
             self.resources.append((resources[i], quantity[i]))
