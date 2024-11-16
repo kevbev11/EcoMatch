@@ -20,8 +20,10 @@ def profile():
         quantity = ui.input(label='How many?', placeholder='start typing')
 
 
+ui.label('I am a . . .')
+
 with ui.button_group():
-    ui.button('Company', on_click=lambda: ui.navigate.to('/profile'), color = 'yellow').style('font-size: 100px').props('outline')
-    ui.button('Organization', on_click=lambda: ui.navigate.to('/profile')).style('font-size: 100px')
+    ui.button('Company', on_click=lambda: ui.navigate.to('/other_page'), color = "#88c5d8").style('font-size: 100px; margin-right: 50px;')
+    ui.button('Organization', on_click=lambda: ui.navigate.to('/other_page'), color = "#88c5d8").style('font-size: 100px')
 
 ui.run()
