@@ -1,5 +1,5 @@
 import users
-# import distance
+import distance
 # import mostcompatible
 
 #picks between company or charity
