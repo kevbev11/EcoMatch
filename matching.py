@@ -58,94 +58,67 @@ class SemanticMatcher:
             self.logger.error(f"Error getting embedding for text '{text}': {str(e)}")
             raise
 
-    def find_matches(self, 
-                    similarity_threshold: float = 0.00,
-                    max_matches: int = 3) -> List[Dict]:
+    def find_matches(self, similarity_threshold: float = 0.00, max_matches: int = 3) -> List[Tuple[str, str, float]]:
         """
         Find semantic matches between supply (companies) and demand (organizations) items.
-        
-        Args:
-            similarity_threshold: Minimum cosine similarity score to consider a match
-            max_matches: Maximum number of matches to return for each demand item
-            
+
         Returns:
-            List of dictionaries containing matches and their details
+            List of tuples (company_name, organization_name, similarity_score).
         """
-        # Prepare data for supply and demand items
         supply_items = [(company.name, resource[0], resource[1], company.location) for company in self.companies for resource in company.resources]
         demand_items = [(organization.name, resource[0], resource[1], organization.location) for organization in self.organizations for resource in organization.resources]
-        
-        # Get embeddings for all items
+
         supply_embeddings = np.array([
             self.get_embedding(name) for _, name, _, _ in supply_items
         ])
-        
+
         demand_embeddings = np.array([
             self.get_embedding(name) for _, name, _, _ in demand_items
         ])
-        
-        # Calculate similarity matrix
+
         similarity_matrix = cosine_similarity(demand_embeddings, supply_embeddings)
-        
         matches = []
-        
-        # Find matches for each demand item
+
         for i, demand in enumerate(demand_items):
             demand_org, demand_name, demand_quantity, demand_location = demand
-            
-            # Get similarity scores for this demand item
             similarity_scores = similarity_matrix[i]
-            
-            # Get indices of top matches above threshold
             top_indices = np.where(similarity_scores >= similarity_threshold)[0]
             top_indices = top_indices[np.argsort(similarity_scores[top_indices])[-max_matches:]]
-            
-            for idx in top_indices:
-                supply_company, supply_name, supply_quantity, supply_location = supply_items[idx][0], supply_items[idx][1], supply_items[idx][2], supply_items[idx][3]
-                similarity_score = similarity_scores[idx]
-                
-                matches.append({
-                    #'demand_organization': demand_org,
-                    #'demand_item': demand_name,
-                    #'demand_quantity': demand_quantity,
-                    supply_company, demand_org,
-                    #'supply_item': supply_name,
-                    #'supply_quantity': supply_quantity,
-                    similarity_score
-                })
-        
-        # Sort matches by similarity score
-        matches.sort(key=lambda x: x['similarity_score'], reverse=True)
-        return sorted(matches, key=lambda x: x[2], reverse=True)
 
-# def example_usage():
-#     """Example usage of the SemanticMatcher class"""
-#     # Sample data for companies
-#     companies = [
-#         users.Company(name='Food Co', location='New York', resources=['Canned tomato soup', 'Whole grain pasta'], quantity=[100, 150], time=2),
-#         users.Company(name='Baby Supplies Inc', location='Los Angeles', resources=['Baby diapers size 4'], quantity=[50], time=1),
-#         users.Company(name='Soap Makers', location='Chicago', resources=['Antibacterial hand soap'], quantity=[200], time=3),
-#         users.Company(name='Warmth Ltd', location='San Francisco', resources=['Cotton blankets'], quantity=[30], time=5)
-#     ]
-    
-#     # Sample data for organizations
-#     organizations = [
-#         users.Organization(name='Community Center', location='New York', resources=['Tomato soup', 'Pasta noodles'], quantity=[80, 120], time=3),
-#         users.Organization(name='Child Care Home', location='Los Angeles', resources=['Diapers for infants'], quantity=[40], time=2),
-#         users.Organization(name='Health Clinic', location='Chicago', resources=['Hand sanitizer'], quantity=[100], time=1),
-#         users.Organization(name='Shelter Home', location='San Francisco', resources=['Warm blankets'], quantity=[25], time=4)
-#     ]
-    
-#     # Initialize matcher
-#     matcher = SemanticMatcher(companies=companies, organizations=organizations)
-    
-#     # Find matches
-#     print("\nBasic Matches:")
-#     matches = matcher.find_matches()
-#     for match in matches:
-#         print(f"Demand: {match['demand_item']} ({match['demand_quantity']}) from {match['demand_organization']} -> "
-#               f"Supply: {match['supply_item']} ({match['supply_quantity']}) from {match['supply_company']} "
-#               f"[Similarity: {match['similarity_score']:.3f}]")
+            for idx in top_indices:
+                supply_company = supply_items[idx][0]
+                similarity_score = similarity_scores[idx]
+                matches.append((supply_company, demand_org, similarity_score))
+
+        # Sort matches by similarity score
+        matches.sort(key=lambda x: x[2], reverse=True)
+        return matches
+
 
 if __name__ == "__main__":
-    example_usage()
+    # Sample companies and organizations
+    companies = [
+        users.Company(name="Food Co", email="foodco@example.com", phone="123-456-7890",
+                address="123 Food St, New York, NY", resources=["Canned tomato soup", "Whole grain pasta"], 
+                quantity=[100, 150], time=2),
+        users.Company(name="Baby Supplies Inc", email="baby@example.com", phone="987-654-3210",
+                address="456 Baby Ave, Los Angeles, CA", resources=["Baby diapers size 4"], 
+                quantity=[50], time=1)
+    ]
+    organizations = [
+        users.Organization(name="Community Center", email="community@example.com", phone="222-333-4444",
+                     address="202 Community Rd, New York, NY", resources=["Tomato soup", "Pasta noodles"], 
+                     quantity=[80, 120], time=3),
+        users.Organization(name="Child Care Home", email="childcare@example.com", phone="333-444-5555",
+                     address="303 Childcare St, Los Angeles, CA", resources=["Diapers for infants"], 
+                     quantity=[40], time=2)
+    ]
+    
+    # Initialize matcher
+    api_key = os.getenv("OPENAI_API_KEY")
+    matcher = SemanticMatcher(api_key=api_key, companies=companies, organizations=organizations)
+    
+    # Find matches
+    matches = matcher.find_matches()
+    for match in matches:
+        print(match)

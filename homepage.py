@@ -4,6 +4,7 @@ import data
 from datetime import datetime
 import time
 import threading
+import matching
 
 label = ui.label("I am a.").style('color: #88c5d8; font-size: 800%; font-weight: 1000').style('position: absolute; top: 25%; left: 50%; transform: translate(-50%, -50%);')
 
@@ -31,72 +32,87 @@ with ui.column().classes('absolute-center items-center'):
         #ui.button('org match view', on_click=lambda: ui.navigate.to('/org_match_view'), color="#88c5d8").style('font-size: 400%;').props('rounded')
         #ui.button('company match view', on_click=lambda: ui.navigate.to('/company_match_view'), color="#88c5d8").style('font-size: 400%;').props('rounded')
 
-@ui.page('/org_match_view') # boxes of companies they matched w/
+@ui.page('/org_match_view')
 def org_match_view():
-#with list of tuples (company, org, score) - use info from tuple[0], tuple[2]
-#need to define vars: companies is list of tuples
+    # Ensure `currOrg` and `companies` are valid
+    if data.currOrg is None or not hasattr(data.currOrg, "resources"):
+        ui.notify("No organization data available.")
+        return
 
-    currOrg = 'Org X' # Placeholder
+    currOrg = data.currOrg
+    if not data.companies:
+        ui.notify("No companies data available.")
+        return
 
-# Sample data for companies
-    companies = [
-        ('Company A', 'Org X', 85),
-        ('Company B', 'Org Y', 90),
-        ('Company C', 'Org Z', 75),
-    ] #placeholder
+    # Initialize matcher
+    matcher = matching.SemanticMatcher(companies=data.companies, organizations=[currOrg])
+    matches = matcher.find_matches(similarity_threshold=-1.0, max_matches=3)
 
-    filteredCompanies = [c for c in companies if c[1] == currOrg]
-    
-    
+    # Debug: Print matches
+    print(f"Matches: {matches}")
+
+    # Define dialog for details
     with ui.dialog() as dialog, ui.card():
-        details_label = ui.label()  # Placeholder 
-        score_label = ui.label()  # Placeholder 
+        details_label = ui.label()
+        score_label = ui.label()
         ui.button('Close', on_click=dialog.close)
 
     def open_dialog(company, org, score):
-        details_label.text = f"Details for {company}"
-        score_label.text = f"Match Score: {score}"
+        details_label.text = f"Company: {company} matched with {org}"
+        score_label.text = f"Match Score: {score:.2f}"
         dialog.open()
 
-    # Create cards for each company
-    for company, org, score in filteredCompanies:
+    # Render UI cards for matches
+    for company, org, score in matches:
         with ui.card():
             ui.label(f"Company: {company}")
-            ui.label(f"Match Score: {score}")
-            ui.button('View Details', on_click=lambda c=company, o=org, s=score: open_dialog(c, o, s))
+            ui.label(f"Matched Organization: {org}")
+            ui.label(f"Match Score: {score:.2f}")
+            ui.button(
+                'View Details',
+                on_click=lambda c=company, o=org, s=score: open_dialog(c, o, s)
+            )
 
-@ui.page('/company_match_view') # boxes of companies they matched w/
+@ui.page('/company_match_view')  # Displays organizations matched with the current company
 def company_match_view():
+    # Ensure `currComp` is set
+    if data.currComp is None or not hasattr(data.currComp, "resources"):
+        ui.notify("No current company data available.")
+        return
 
-    currCompany = 'Company A' # Placeholder
+    currComp = data.currComp
+    if not data.orgs:
+        ui.notify("No organizations data available.")
+        return
 
-# Sample data for companies
-    companies = [
-        ('Company A', 'Org X', 85),
-        ('Company B', 'Org Y', 90),
-        ('Company C', 'Org Z', 75),
-    ] #placeholder
+    # Initialize matcher with the current company and all organizations
+    matcher = matching.SemanticMatcher(companies=[currComp], organizations=data.orgs)
+    matches = matcher.find_matches(similarity_threshold=-1.0, max_matches=3)
 
-    filteredOrgs = [o for o in companies if o[0] == currCompany]
-    
-    
+    # Debug: Print matches
+    print(f"Matches: {matches}")
+
+    # Define dialog for details
     with ui.dialog() as dialog, ui.card():
-        details_label = ui.label()  # Placeholder 
-        score_label = ui.label()  # Placeholder 
+        details_label = ui.label()
+        score_label = ui.label()
         ui.button('Close', on_click=dialog.close)
 
-    def open_dialog(company, org, score):
-        details_label.text = f"Details for {org}"
-        score_label.text = f"Match Score: {score}"
+    def open_dialog(org, company, score):
+        details_label.text = f"Organization: {org} matched with {company}"
+        score_label.text = f"Match Score: {score:.2f}"
         dialog.open()
 
-    # Create cards for each company
-    for company, org, score in filteredOrgs:
+    # Render UI cards for matches
+    for org, company, score in matches:
         with ui.card():
             ui.label(f"Organization: {org}")
-            ui.label(f"Match Score: {score}")
-            ui.button('View Details', on_click=lambda c=company, o=org, s=score: open_dialog(c, o, s))
-
+            ui.label(f"Matched Company: {company}")
+            ui.label(f"Match Score: {score:.2f}")
+            ui.button(
+                'View Details',
+                on_click=lambda o=org, c=company, s=score: open_dialog(o, c, s)
+            )
 
 #Displays that there is no match for a company or organization
 @ui.page('/no_match')
