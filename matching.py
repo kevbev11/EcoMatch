@@ -59,7 +59,7 @@ class SemanticMatcher:
             raise
 
     def find_matches(self, 
-                    similarity_threshold: float = 0.6,
+                    similarity_threshold: float = 0.00,
                     max_matches: int = 3) -> List[Dict]:
         """
         Find semantic matches between supply (companies) and demand (organizations) items.
@@ -105,47 +105,47 @@ class SemanticMatcher:
                 similarity_score = similarity_scores[idx]
                 
                 matches.append({
-                    'demand_organization': demand_org,
-                    'demand_item': demand_name,
-                    'demand_quantity': demand_quantity,
-                    'supply_company': supply_company,
-                    'supply_item': supply_name,
-                    'supply_quantity': supply_quantity,
-                    'similarity_score': similarity_score
+                    #'demand_organization': demand_org,
+                    #'demand_item': demand_name,
+                    #'demand_quantity': demand_quantity,
+                    supply_company, demand_org,
+                    #'supply_item': supply_name,
+                    #'supply_quantity': supply_quantity,
+                    similarity_score
                 })
         
         # Sort matches by similarity score
         matches.sort(key=lambda x: x['similarity_score'], reverse=True)
-        return matches
+        return sorted(matches, key=lambda x: x[2], reverse=True)
 
-def example_usage():
-    """Example usage of the SemanticMatcher class"""
-    # Sample data for companies
-    companies = [
-        users.Company(name='Food Co', location='New York', resources=['Canned tomato soup', 'Whole grain pasta'], quantity=[100, 150], time=2),
-        users.Company(name='Baby Supplies Inc', location='Los Angeles', resources=['Baby diapers size 4'], quantity=[50], time=1),
-        users.Company(name='Soap Makers', location='Chicago', resources=['Antibacterial hand soap'], quantity=[200], time=3),
-        users.Company(name='Warmth Ltd', location='San Francisco', resources=['Cotton blankets'], quantity=[30], time=5)
-    ]
+# def example_usage():
+#     """Example usage of the SemanticMatcher class"""
+#     # Sample data for companies
+#     companies = [
+#         users.Company(name='Food Co', location='New York', resources=['Canned tomato soup', 'Whole grain pasta'], quantity=[100, 150], time=2),
+#         users.Company(name='Baby Supplies Inc', location='Los Angeles', resources=['Baby diapers size 4'], quantity=[50], time=1),
+#         users.Company(name='Soap Makers', location='Chicago', resources=['Antibacterial hand soap'], quantity=[200], time=3),
+#         users.Company(name='Warmth Ltd', location='San Francisco', resources=['Cotton blankets'], quantity=[30], time=5)
+#     ]
     
-    # Sample data for organizations
-    organizations = [
-        users.Organization(name='Community Center', location='New York', resources=['Tomato soup', 'Pasta noodles'], quantity=[80, 120], time=3),
-        users.Organization(name='Child Care Home', location='Los Angeles', resources=['Diapers for infants'], quantity=[40], time=2),
-        users.Organization(name='Health Clinic', location='Chicago', resources=['Hand sanitizer'], quantity=[100], time=1),
-        users.Organization(name='Shelter Home', location='San Francisco', resources=['Warm blankets'], quantity=[25], time=4)
-    ]
+#     # Sample data for organizations
+#     organizations = [
+#         users.Organization(name='Community Center', location='New York', resources=['Tomato soup', 'Pasta noodles'], quantity=[80, 120], time=3),
+#         users.Organization(name='Child Care Home', location='Los Angeles', resources=['Diapers for infants'], quantity=[40], time=2),
+#         users.Organization(name='Health Clinic', location='Chicago', resources=['Hand sanitizer'], quantity=[100], time=1),
+#         users.Organization(name='Shelter Home', location='San Francisco', resources=['Warm blankets'], quantity=[25], time=4)
+#     ]
     
-    # Initialize matcher
-    matcher = SemanticMatcher(companies=companies, organizations=organizations)
+#     # Initialize matcher
+#     matcher = SemanticMatcher(companies=companies, organizations=organizations)
     
-    # Find matches
-    print("\nBasic Matches:")
-    matches = matcher.find_matches()
-    for match in matches:
-        print(f"Demand: {match['demand_item']} ({match['demand_quantity']}) from {match['demand_organization']} -> "
-              f"Supply: {match['supply_item']} ({match['supply_quantity']}) from {match['supply_company']} "
-              f"[Similarity: {match['similarity_score']:.3f}]")
+#     # Find matches
+#     print("\nBasic Matches:")
+#     matches = matcher.find_matches()
+#     for match in matches:
+#         print(f"Demand: {match['demand_item']} ({match['demand_quantity']}) from {match['demand_organization']} -> "
+#               f"Supply: {match['supply_item']} ({match['supply_quantity']}) from {match['supply_company']} "
+#               f"[Similarity: {match['similarity_score']:.3f}]")
 
 if __name__ == "__main__":
     example_usage()

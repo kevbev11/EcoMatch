@@ -22,10 +22,6 @@ class makeGraph:
         self.edges[startNode].append((pointNode, weight))
         self.edges[pointNode].append((startNode, weight))
 
-#insert calculate cost function here (calc compatibilty btwn a company and org)
-#input is resource availability, quantity, time, distance
-#output is list of edge tuples
-
 class highestCompatibility: #creates compatibilites for ALL companies and orgs
     #need to inherit variables from companies, organizations classes
     def __init__(self):
@@ -37,9 +33,17 @@ class highestCompatibility: #creates compatibilites for ALL companies and orgs
         for organization in organizations:
             self.graph.makeNode(organization)
 
-    def addWeights(self, edges): #edges is 3 element tuple w/company, organization, weight btwn 2
+    def addWeights(self, edges): #edges is list w/ 3 element tuple w/company, organization, weight btwn 2
+        edges = self.getCompatibilityEdges()
         for startNode, pointNode, weight in edges:
             self.graph.makeEdge(startNode, pointNode, weight)
+
+    def getCompatibilityEdges(self) -> list[tuple[str, str, float]]:
+        return self.matcher.find_matches()
+
+#insert calculate cost function here (calc compatibilty btwn a company and org)
+#input is resource availability, quantity, time, distance
+#output is list of edge tuples
 
 def dijkstra(graph, source):
     distances = {node: float('inf') for node in graph.edges} #initialize distances btwn nodes - default to infinity
