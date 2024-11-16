@@ -33,10 +33,10 @@ def getInfo(type):
             quantity.append(getIntValue("How many can you provide? ")) 
             while True:
                 check = input("Would you like to add another resource? [Y]/[N] ")
-                if check == 'N':
+                if check in {'n', 'N'}:
                     addResources = False
                     break
-                elif check == 'Y':
+                elif check in {'y', 'Y'}:
                     break
                 else:
                     print("Invalid input")
@@ -51,10 +51,10 @@ def getInfo(type):
             quantity.append(getIntValue("How many do you need? "))
             while True:
                 check = input("Would you like to add another resource? [Y]/[N] ")
-                if check == 'N':
+                if check in {'n', 'N'}:
                     addResources = False
                     break
-                elif check == 'Y':
+                elif check in {'y', 'Y'}:
                     break
                 else:
                     print("Invalid input")
