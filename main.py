@@ -65,7 +65,10 @@ def getIntValue(question):
     while True:
         try:
             value = int(input(question))
-            break
+            if value < 1:
+                print("Invalid input. Please enter a positive number.")
+            else:
+                break
         except ValueError:
             print("Invalid input. Please enter a number.") 
     return value
