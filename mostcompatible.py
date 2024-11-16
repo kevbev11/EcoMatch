@@ -1,4 +1,7 @@
+from matching import SemanticMatcher
 import heapq as hq 
+import pandas as pd
+
 class makeGraph:
     def __init__(self):
         #nodes: companies and organizations

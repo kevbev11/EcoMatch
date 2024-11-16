@@ -1,9 +1,12 @@
 from geopy.geocoders import Nominatim
 from geopy.distance import geodesic
+import os
 import matching
 
+USER_AGENT = "geoapiExercises"
+
 def getLatLong(address):
-    geolocator = Nominatim(user_agent="geoapiExercises")
+    geolocator = Nominatim(user_agent=USER_AGENT)
     loc = geolocator.geocode(address)
     if loc:
         return loc.latitude, loc.longitude
