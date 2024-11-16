@@ -48,6 +48,15 @@ def getType():
         except ValueError:
             print("Invalid input. Please enter a number.")
 
+def getIntValue(question):
+    while True:
+        try:
+            value = int(input(question))
+            break
+        except ValueError:
+            print("Invalid input. Please enter a number.") 
+    return value
+
 #returns the object
 def getInfo(type):
     addResources = True
@@ -58,21 +67,17 @@ def getInfo(type):
         location = input("What is your company's address? ")
         while addResources:
             resource.append(input("What resource can you provide? "))
+            quantity.append(getIntValue("How many can you provide? ")) 
             while True:
-                try:
-                    quantity.append(int(input("How many can you provide (type a number)? ")))
+                check = input("Would you like to add another resource? [Y]/[N] ")
+                if check == 'N':
+                    addResources = False
                     break
-                except ValueError:
-                    print("Invalid input. Please enter a number.")   
-            check = input("Would you like to add another resource? [Y]/[N] ")
-            if check == 'N':
-                addResources = False
-        while True:
-            try:
-                time = int(input("In how many days can you deliver these items (type a number)? "))
-                break
-            except ValueError:
-                print("Invalid input. Please enter a number.")
+                elif check == 'Y':
+                    break
+                else:
+                    print("Invalid input")
+        time = getIntValue("In how many days can you deliver these items? ")
         return Company(name, location, resource, quantity, time)
     
     else:
@@ -80,21 +85,11 @@ def getInfo(type):
         location = input("What is your organization's address? ")
         while addResources:
             resource.append(input("What resource do you need? "))
-            while True:
-                try:
-                    quantity.append(int(input("How many do you need (type a number)? ")))
-                    break
-                except ValueError:
-                    print("Invalid input. Please enter a number.")
+            quantity.append(getIntValue("How many do you need? "))
             check = input("Would you like to add another resource? [Y]/[N] ")
             if check == 'N':
                 addResources = False
-        while True:
-            try:
-                time = int(input("In how many days do you need these by (type a number)? "))
-                break
-            except ValueError:
-                print("Invalid input. Please enter a number.")
+        time = getIntValue("In how many days do you need these by? ")
         return Organization(name, location, resource, quantity, time)
 
 def main():
