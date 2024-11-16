@@ -6,15 +6,17 @@ import os
 from sklearn.metrics.pairwise import cosine_similarity
 import logging
 from dotenv import load_dotenv
-
+import users
 load_dotenv()
 class SemanticMatcher:
-    def __init__(self, api_key: str = None):
+    def __init__(self, api_key: str = None, companies: List = None, organizations: List = None):
         """
-        Initialize the SemanticMatcher with OpenAI API key.
+        Initialize the SemanticMatcher with OpenAI API key, companies, and organizations.
         
         Args:
             api_key: OpenAI API key. If not provided, will look for OPENAI_API_KEY in environment variables.
+            companies: List of Company instances.
+            organizations: List of Organization instances.
         """
         if api_key is None:
             api_key = os.getenv('OPENAI_API_KEY')
@@ -25,6 +27,8 @@ class SemanticMatcher:
         self.embedding_cache = {}
         logging.basicConfig(level=logging.INFO)
         self.logger = logging.getLogger(__name__)
+        self.companies = companies
+        self.organizations = organizations
 
     def get_embedding(self, text: str) -> List[float]:
         """
@@ -55,29 +59,29 @@ class SemanticMatcher:
             raise
 
     def find_matches(self, 
-                    supply_items: pd.DataFrame, 
-                    demand_items: pd.DataFrame,
                     similarity_threshold: float = 0.6,
                     max_matches: int = 3) -> List[Dict]:
         """
-        Find semantic matches between supply and demand items.
+        Find semantic matches between supply (companies) and demand (organizations) items.
         
         Args:
-            supply_items: DataFrame with columns 'SupplyItemName' and 'Quantity'
-            demand_items: DataFrame with columns 'DemandItemName' and 'Quantity'
             similarity_threshold: Minimum cosine similarity score to consider a match
             max_matches: Maximum number of matches to return for each demand item
             
         Returns:
             List of dictionaries containing matches and their details
         """
+        # Prepare data for supply and demand items
+        supply_items = [(company.name, resource[0], resource[1], company.location) for company in self.companies for resource in company.resources]
+        demand_items = [(organization.name, resource[0], resource[1], organization.location) for organization in self.organizations for resource in organization.resources]
+        
         # Get embeddings for all items
         supply_embeddings = np.array([
-            self.get_embedding(name) for name in supply_items['SupplyItemName']
+            self.get_embedding(name) for _, name, _, _ in supply_items
         ])
         
         demand_embeddings = np.array([
-            self.get_embedding(name) for name in demand_items['DemandItemName']
+            self.get_embedding(name) for _, name, _, _ in demand_items
         ])
         
         # Calculate similarity matrix
@@ -86,9 +90,8 @@ class SemanticMatcher:
         matches = []
         
         # Find matches for each demand item
-        for i, demand_row in demand_items.iterrows():
-            demand_name = demand_row['DemandItemName']
-            demand_quantity = demand_row['Quantity']
+        for i, demand in enumerate(demand_items):
+            demand_org, demand_name, demand_quantity, demand_location = demand
             
             # Get similarity scores for this demand item
             similarity_scores = similarity_matrix[i]
@@ -98,13 +101,14 @@ class SemanticMatcher:
             top_indices = top_indices[np.argsort(similarity_scores[top_indices])[-max_matches:]]
             
             for idx in top_indices:
-                supply_name = supply_items.iloc[idx]['SupplyItemName']
-                supply_quantity = supply_items.iloc[idx]['Quantity']
+                supply_company, supply_name, supply_quantity, supply_location = supply_items[idx][0], supply_items[idx][1], supply_items[idx][2], supply_items[idx][3]
                 similarity_score = similarity_scores[idx]
                 
                 matches.append({
+                    'demand_organization': demand_org,
                     'demand_item': demand_name,
                     'demand_quantity': demand_quantity,
+                    'supply_company': supply_company,
                     'supply_item': supply_name,
                     'supply_quantity': supply_quantity,
                     'similarity_score': similarity_score
@@ -114,92 +118,33 @@ class SemanticMatcher:
         matches.sort(key=lambda x: x['similarity_score'], reverse=True)
         return matches
 
-    def suggest_optimal_matches(self, 
-                              supply_items: pd.DataFrame, 
-                              demand_items: pd.DataFrame,
-                              similarity_threshold: float = 0.65) -> List[Dict]:
-        """
-        Suggest optimal matches considering both semantic similarity and available quantities.
-        
-        Args:
-            supply_items: DataFrame with columns 'SupplyItemName' and 'Quantity'
-            demand_items: DataFrame with columns 'DemandItemName' and 'Quantity'
-            similarity_threshold: Minimum similarity score to consider a match
-            
-        Returns:
-            List of optimal matches with allocation details
-        """
-        # Get initial matches
-        all_matches = self.find_matches(supply_items, demand_items, similarity_threshold)
-        
-        # Create copy of supply quantities to track remaining amounts
-        supply_remaining = supply_items.copy()
-        optimal_matches = []
-        
-        # Process matches in order of similarity score
-        for match in all_matches:
-            supply_idx = supply_items[supply_items['SupplyItemName'] == match['supply_item']].index[0]
-            remaining_quantity = supply_remaining.loc[supply_idx, 'Quantity']
-            
-            if remaining_quantity > 0:
-                # Calculate how much can be allocated
-                allocation = min(remaining_quantity, match['demand_quantity'])
-                
-                if allocation > 0:
-                    optimal_match = match.copy()
-                    optimal_match['allocated_quantity'] = allocation
-                    optimal_matches.append(optimal_match)
-                    
-                    # Update remaining supply quantity
-                    supply_remaining.loc[supply_idx, 'Quantity'] -= allocation
-        
-        return optimal_matches
-
 def example_usage():
     """Example usage of the SemanticMatcher class"""
-    # Sample data
-    supply_data = {
-        'SupplyItemName': [
-            'Canned tomato soup',
-            'Baby diapers size 4',
-            'Antibacterial hand soap',
-            'Whole grain pasta',
-            'Cotton blankets'
-        ],
-        'Quantity': [100, 50, 200, 150, 30]
-    }
+    # Sample data for companies
+    companies = [
+        users.Company(name='Food Co', location='New York', resources=['Canned tomato soup', 'Whole grain pasta'], quantity=[100, 150], time=2),
+        users.Company(name='Baby Supplies Inc', location='Los Angeles', resources=['Baby diapers size 4'], quantity=[50], time=1),
+        users.Company(name='Soap Makers', location='Chicago', resources=['Antibacterial hand soap'], quantity=[200], time=3),
+        users.Company(name='Warmth Ltd', location='San Francisco', resources=['Cotton blankets'], quantity=[30], time=5)
+    ]
     
-    demand_data = {
-        'DemandItemName': [
-            'Tomato soup',
-            'Diapers for infants',
-            'Hand sanitizer',
-            'Pasta noodles',
-            'Warm blankets'
-        ],
-        'Quantity': [80, 40, 100, 120, 25]
-    }
-    
-    supply_df = pd.DataFrame(supply_data)
-    demand_df = pd.DataFrame(demand_data)
+    # Sample data for organizations
+    organizations = [
+        users.Organization(name='Community Center', location='New York', resources=['Tomato soup', 'Pasta noodles'], quantity=[80, 120], time=3),
+        users.Organization(name='Child Care Home', location='Los Angeles', resources=['Diapers for infants'], quantity=[40], time=2),
+        users.Organization(name='Health Clinic', location='Chicago', resources=['Hand sanitizer'], quantity=[100], time=1),
+        users.Organization(name='Shelter Home', location='San Francisco', resources=['Warm blankets'], quantity=[25], time=4)
+    ]
     
     # Initialize matcher
-    matcher = SemanticMatcher()
+    matcher = SemanticMatcher(companies=companies, organizations=organizations)
     
     # Find matches
     print("\nBasic Matches:")
-    matches = matcher.find_matches(supply_df, demand_df)
+    matches = matcher.find_matches()
     for match in matches:
-        print(f"Demand: {match['demand_item']} ({match['demand_quantity']}) -> "
-              f"Supply: {match['supply_item']} ({match['supply_quantity']}) "
-              f"[Similarity: {match['similarity_score']:.3f}]")
-    
-    # Find optimal matches with quantity allocation
-    print("\nOptimal Matches with Allocation:")
-    optimal_matches = matcher.suggest_optimal_matches(supply_df, demand_df)
-    for match in optimal_matches:
-        print(f"Demand: {match['demand_item']} ({match['demand_quantity']}) -> "
-              f"Supply: {match['supply_item']} (Allocated: {match['allocated_quantity']}) "
+        print(f"Demand: {match['demand_item']} ({match['demand_quantity']}) from {match['demand_organization']} -> "
+              f"Supply: {match['supply_item']} ({match['supply_quantity']}) from {match['supply_company']} "
               f"[Similarity: {match['similarity_score']:.3f}]")
 
 if __name__ == "__main__":
