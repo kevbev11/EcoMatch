@@ -1,2 +1,5 @@
-from flask import Flask
-app = Flask(__name__)
+from nicegui import ui
+
+ui.label('Hello NiceGUI!')
+
+ui.run()

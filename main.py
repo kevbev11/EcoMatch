@@ -4,7 +4,7 @@ import distance
 
 #picks between company or charity
 def getType():
-    options = ["Company", "Charitable Oranization", "None"]
+    options = ["Company", "Charitable Organization", "None"]
     print("Are you a company or a charitable organization?")
 
     for i, option in enumerate(options):
