@@ -10,8 +10,10 @@ from nicegui import ui
 def other_page():
     ui.label('this is the other page')
 
+ui.label('I am a . . .')
+
 with ui.button_group():
-    ui.button('Company', on_click=lambda: ui.navigate.to('/other_page'), color = 'yellow').style('font-size: 100px').props('outline')
-    ui.button('Organization', on_click=lambda: ui.navigate.to('/other_page')).style('font-size: 100px')
+    ui.button('Company', on_click=lambda: ui.navigate.to('/other_page'), color = "#88c5d8").style('font-size: 100px; margin-right: 50px;')
+    ui.button('Organization', on_click=lambda: ui.navigate.to('/other_page'), color = "#88c5d8").style('font-size: 100px')
 
 ui.run()
