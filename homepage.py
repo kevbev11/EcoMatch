@@ -16,10 +16,10 @@ def company_profile():
 
     with ui.card():
         # Static inputs inside the card
-        name = ui.input(label='Name', placeholder='start typing', validation={'Must Not Be Empty': lambda value: len(value) > 0}).value
-        email = ui.input(label='Email', placeholder='example@gmail.com', validation={'Must Not Be Empty': lambda value: len(value) > 0}).value
-        phone = ui.input(label='Phone Number', placeholder='(XXX) XXX-XXXX', validation={'Must Not Be Empty': lambda value: len(value) > 0}).value
-        address = ui.input(label='Address', placeholder='start typing', validation={'Must Not Be Empty': lambda value: len(value) > 0}).value
+        name = ui.input(label='Name', placeholder='start typing', validation={'Must Not Be Empty': lambda value: len(value) > 0})
+        email = ui.input(label='Email', placeholder='example@gmail.com', validation={'Must Not Be Empty': lambda value: len(value) > 0})
+        phone = ui.input(label='Phone Number', placeholder='(XXX) XXX-XXXX', validation={'Must Not Be Empty': lambda value: len(value) > 0})
+        address = ui.input(label='Address', placeholder='start typing', validation={'Must Not Be Empty': lambda value: len(value) > 0})
 
         # Date picker with menu
         with ui.input(label='Date') as date:
@@ -32,7 +32,7 @@ def company_profile():
             time = date
 
         # Number input for dynamic fields
-        num = ui.number(label='Number', value=1, validation={'Must Be Positive': lambda value: value > 0})
+        num = ui.number(label='Number of Resources', value=1, validation={'Must Be Positive': lambda value: value > 0})
 
         # A container to hold dynamically added inputs, placed **inside the card**
         with ui.column() as container:
@@ -50,10 +50,10 @@ def company_profile():
                 for i in range(count):
                     with container:  # Add inputs to the container
                         with ui.row().classes('items-center'):  # Side-by-side layout
-                            resource = ui.input(label=f'Resource {i + 1}', placeholder='Enter name', validation={'Must Not Be Empty': lambda value: len(value) > 0}).value
-                            amount = ui.number(label='Amount', value=1, validation={'Must Be Positive': lambda value: value > 0}).value
-                            resources.append(resource)  # Store each input for later use
-                            quantity.append(amount)
+                            resource = ui.input(label=f'Resource {i + 1}', placeholder='Enter name', validation={'Must Not Be Empty': lambda value: len(value) > 0})
+                            amount = ui.number(label='Amount', value=1, validation={'Must Be Positive': lambda value: value > 0})
+                            resources.append(resource.value)  # Store each input for later use
+                            quantity.append(amount.value)
             except ValueError:
                 ui.notify('Please enter a valid positive number.')
 
@@ -63,14 +63,17 @@ def company_profile():
         # Function to save data into a Company object
         def save_data():
             # Collect data from inputs
-            if not name or not email or not phone or not address or not date.value or not (r.value for r in resources) or not (q.value for q in quantity):
-                ui.notify(f"You still have one or more blanks to fill")
+            if not all([name.value, email.value, phone.value, address.value, time.value]):
+                ui.notify("You still have one or more blanks to fill.")
                 return
-            
-            data.companies.add(users.Company(name, email, phone, address, [r.value for r in resources], [q.value for q in quantity], date.value))
-            
+            elif not (r for r in resources):
+                ui.notify("Please fill in all resource fields.")
+                return
+            data.companies.add(users.Company(name.value, email.value, phone.value, address.value, [r for r in resources], [q for q in quantity], time.value))
             # Display or process the Company object
-            ui.notify(f"Company saved: {name}")
+            ui.notify(f"Company saved: {name.value}")
+            if data.orgs == set(): ui.navigate.to('/no_match')
+            else: ui.navigate.to('/company_matches')
         
         ui.button('Save', on_click=save_data)
 
@@ -81,10 +84,10 @@ def org_profile():
 
     with ui.card():
         # Static inputs inside the card
-        name = ui.input(label='Name', placeholder='start typing', validation={'Must Not Be Empty': lambda value: len(value) > 0}).value
-        email = ui.input(label='Email', placeholder='example@gmail.com', validation={'Must Not Be Empty': lambda value: len(value) > 0}).value
-        phone = ui.input(label='Phone Number', placeholder='(XXX) XXX-XXXX', validation={'Must Not Be Empty': lambda value: len(value) > 0}).value
-        address = ui.input(label='Address', placeholder='start typing', validation={'Must Not Be Empty': lambda value: len(value) > 0}).value
+        name = ui.input(label='Name', placeholder='start typing', validation={'Must Not Be Empty': lambda value: len(value) > 0})
+        email = ui.input(label='Email', placeholder='example@gmail.com', validation={'Must Not Be Empty': lambda value: len(value) > 0})
+        phone = ui.input(label='Phone Number', placeholder='(XXX) XXX-XXXX', validation={'Must Not Be Empty': lambda value: len(value) > 0})
+        address = ui.input(label='Address', placeholder='start typing', validation={'Must Not Be Empty': lambda value: len(value) > 0})
 
         # Date picker with menu
         with ui.input(label='Date') as date:
@@ -115,10 +118,10 @@ def org_profile():
                 for i in range(count):
                     with container:  # Add inputs to the container
                         with ui.row().classes('items-center'):  # Side-by-side layout
-                            resource = ui.input(label=f'Resource {i + 1}', placeholder='Enter name', validation={'Must Not Be Empty': lambda value: len(value) > 0}).value
-                            amount = ui.number(label='Amount', value=1, validation={'Must Be Positive': lambda value: value > 0}).value
-                            resources.append(resource)  # Store each input for later use
-                            quantity.append(amount)
+                            resource = ui.input(label=f'Resource {i + 1}', placeholder='Enter name', validation={'Must Not Be Empty': lambda value: len(value) > 0})
+                            amount = ui.number(label='Amount', value=1, validation={'Must Be Positive': lambda value: value > 0})
+                            resources.append(resource.value)  # Store each input for later use
+                            quantity.append(amount.value)
             except ValueError:
                 ui.notify('Please enter a valid positive number.')
 
@@ -128,14 +131,20 @@ def org_profile():
         # Function to save data into a Company object
         def save_data():
             # Collect data from inputs
-            if not name or not email or not phone or not address or not date.value or not (r.value for r in resources) or not (q.value for q in quantity):
-                ui.notify(f"You still have one or more blanks to fill")
+            if not all([name.value, email.value, phone.value, address.value, time.value]):
+                ui.notify("You still have one or more blanks to fill.")
+                return
+            elif not (r for r in resources):
+                ui.notify("Please fill in all resource fields.")
                 return
             
-            data.orgs.add(users.Organization(name, email, phone, address, [r.value for r in resources], [q.value for q in quantity], date.value))
+            data.orgs.add(users.Organization(name.value, email.value, phone.value, address.value, [r for r in resources], [q for q in quantity], time.value))
             
             # Display or process the Company object
-            ui.notify(f"Organization saved: {name}")
+            ui.notify(f"Organization saved: {name.value}")
+
+            if data.companies == set(): ui.navigate.to('/no_match')
+            else: ui.navigate.to('/org_matches')
         
         ui.button('Save', on_click=save_data)
 
