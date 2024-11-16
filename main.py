@@ -1,9 +1,10 @@
-import organizations
-import distance
+import users
+# import distance
+# import mostcompatible
 
 #picks between company or charity
 def getType():
-    options = ["Company", "Charitable Oranization"]
+    options = ["Company", "Charitable Oranization", "None"]
     print("Are you a company or a charitable organization?")
 
     for i, option in enumerate(options):
@@ -12,21 +13,12 @@ def getType():
     while True:
         try:
             answer = int(input("Enter your answer (number): "))
-            if 1 <= answer <= 2:
+            if 1 <= answer <= 3:
                 return options[answer - 1]
             else:
                 print("Invalid choice. Please enter a number within the range.")
         except ValueError:
             print("Invalid input. Please enter a number.")
-
-def getIntValue(question):
-    while True:
-        try:
-            value = int(input(question))
-            break
-        except ValueError:
-            print("Invalid input. Please enter a number.") 
-    return value
 
 #returns the object
 def getInfo(type):
@@ -49,7 +41,7 @@ def getInfo(type):
                 else:
                     print("Invalid input")
         time = getIntValue("In how many days can you deliver these items? ")
-        return Company(name, location, resource, quantity, time)
+        return users.Company(name, location, resource, quantity, time)
     
     else:
         name = input("What is your organization called? ")
@@ -57,20 +49,38 @@ def getInfo(type):
         while addResources:
             resource.append(input("What resource do you need? "))
             quantity.append(getIntValue("How many do you need? "))
-            check = input("Would you like to add another resource? [Y]/[N] ")
-            if check == 'N':
-                addResources = False
+            while True:
+                check = input("Would you like to add another resource? [Y]/[N] ")
+                if check == 'N':
+                    addResources = False
+                    break
+                elif check == 'Y':
+                    break
+                else:
+                    print("Invalid input")
         time = getIntValue("In how many days do you need these by? ")
-        return Organization(name, location, resource, quantity, time)
+        return users.Organization(name, location, resource, quantity, time)
+
+def getIntValue(question):
+    while True:
+        try:
+            value = int(input(question))
+            break
+        except ValueError:
+            print("Invalid input. Please enter a number.") 
+    return value
 
 def main():
     companies = set()
     orgs = set()
-    type = getType()
-    if type == "Company":
-        companies.add(getInfo(type))
-    else:
-        orgs.add(getInfo(type))
+    while True:
+        type = getType()
+        if type == "Company":
+            companies.add(getInfo(type))
+        elif type == "Charitable Organization":
+            orgs.add(getInfo(type))
+        else:
+            break
     print(companies)
     print(orgs)
 
