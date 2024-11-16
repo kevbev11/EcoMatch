@@ -19,12 +19,10 @@ def profile():
         time = ui.input(label='When?', placeholder='start typing')
         quantity = ui.input(label='How many?', placeholder='start typing')
 
-
-with ui.row().classes('items-center'):
-    ui.label('I am a . . .').style('color: #88c5d8; font-size: 500%; font-weight: 300')
-    with ui.button_group():
-        ui.button('Company', on_click=lambda: ui.navigate.to('/other_page'), color = "#88c5d8").style('font-size: 100px; margin-right: 100px;')
-        ui.button('Organization', on_click=lambda: ui.navigate.to('/other_page'), color = "#88c5d8").style('font-size: 100px')
+ui.label('I am a . . .').style('color: #88c5d8; font-size: 600%; font-weight: 300')
+with ui.button_group():
+        ui.button('Company', on_click=lambda: ui.navigate.to('/profile'), color = "#88c5d8").style('font-size: 100px; margin-right: 100px;')
+        ui.button('Organization', on_click=lambda: ui.navigate.to('/profile'), color = "#88c5d8").style('font-size: 100px')
 
 
 ui.run()
